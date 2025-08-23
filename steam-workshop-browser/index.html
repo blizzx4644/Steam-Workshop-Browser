@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Steam Workshop Browser</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body { 
+  background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+  color: #f8fafc;
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.app-header {
+  background: rgba(30, 30, 46, 0.8);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+  padding: 16px 24px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.header-content {
+  max-width: 1600px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.app-title {
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.search-bars {
+  flex: 1;
+  display: flex;
+  gap: 16px;
+  max-width: 800px;
+}
+
+.search-bar {
+  flex: 1;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  background: rgba(15, 15, 15, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: #f8fafc;
+  padding: 12px 16px 12px 44px;
+  font-size: 14px;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  background: rgba(15, 15, 15, 0.8);
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.search-icon {
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.main-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: 24px;
+  min-height: calc(100vh - 80px);
+}
+
+.quick-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.stat-card {
+  background: rgba(30, 30, 46, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  border-color: #a78bfa;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(167, 139, 250, 0.15);
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  color: #a78bfa;
+  margin-bottom: 4px;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #9ca3af;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.content-sections {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 24px;
+  height: 100%;
+}
+
+.section-card {
+  background: rgba(30, 30, 46, 0.4);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  padding: 20px 24px 16px;
+  background: rgba(139, 92, 246, 0.1);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.section-title {
+  color: #a78bfa;
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-subtitle {
+  color: #9ca3af;
+  font-size: 12px;
+}
+
+#gameList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.gameItem {
+  background: rgba(15, 15, 15, 0.4);
+  border: 1px solid rgba(139, 92, 246, 0.1);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gameItem:hover {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #a78bfa;
+  transform: translateX(4px);
+}
+
+.gameItem span {
+  flex: 1;
+  margin-right: 12px;
+  color: #f8fafc;
+  font-size: 13px;
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gameItem button {
+  background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+  border: none;
+  border-radius: 8px;
+  color: white;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.gameItem button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+#modList {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  align-content: start;
+}
+
+#modList h3 {
+  grid-column: 1 / -1;
+  color: #a78bfa;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  text-align: center;
+  padding: 16px;
+  background: rgba(139, 92, 246, 0.1);
+  border-radius: 12px;
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+#modList p {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #9ca3af;
+  padding: 32px;
+  font-size: 14px;
+}
+
+#modList p.error {
+  color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.modItem {
+  background: rgba(15, 15, 15, 0.6);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  flex-direction: column;
+}
+
+.modItem:hover {
+  transform: translateY(-8px) scale(1.02);
+  border-color: #a78bfa;
+  box-shadow: 0 12px 40px rgba(139, 92, 246, 0.2);
+}
+
+.modItem img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  background: linear-gradient(135deg, #1e1e2e, #16213e);
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+}
+
+.modTitle {
+  color: #f8fafc;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 14px 14px 8px 14px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.modButtons {
+  display: flex;
+  gap: 8px;
+  padding: 14px;
+  padding-top: 0;
+}
+
+.modButtons button {
+  flex: 1;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.modButtons button:first-child {
+  background: transparent;
+  color: #a78bfa;
+  border: 1px solid rgba(139, 92, 246, 0.5);
+}
+
+.modButtons button:first-child:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.1);
+  border-color: #a78bfa;
+}
+
+.modButtons button:last-child {
+  background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+  color: white;
+}
+
+.modButtons button:last-child:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+}
+
+.modButtons button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(30, 30, 46, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #8b5cf6, #a78bfa);
+  border-radius: 3px;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  text-align: center;
+  color: #6b7280;
+  grid-column: 1 / -1;
+}
+
+.empty-icon {
+  font-size: 40px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.loading {
+  color: #a78bfa;
+  text-align: center;
+  padding: 32px;
+  font-size: 14px;
+  grid-column: 1 / -1;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.loading {
+  animation: pulse 2s infinite;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .content-sections {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  
+  #modList {
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .header-content {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .search-bars {
+    flex-direction: column;
+    max-width: none;
+    width: 100%;
+  }
+  
+  .quick-stats {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+  
+  #modList {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+</style>
+</head>
+<body>
+<div class="app-header">
+  <div class="header-content">
+    <div class="app-title">
+       Steam Workshop Browser
+    </div>
+    <div class="search-bars">
+      <div class="search-bar">
+        <div class="search-icon"></div>
+        <input id="gameSearch" class="search-input" placeholder="Rechercher un jeu Steam..." />
+      </div>
+      <div class="search-bar">
+        <div class="search-icon"></div>
+        <input id="modSearch" class="search-input" placeholder="Rechercher dans les mods..." />
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="content-sections">
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+           Bibliothèque Steam
+        </div>
+        <div class="section-subtitle">
+          Recherchez et sélectionnez un jeu
+        </div>
+      </div>
+      <div id="gameList">
+        <p>Tapez le nom d'un jeu pour commencer la recherche</p>
+      </div>
+    </div>
+
+    <div class="section-card">
+      <div class="section-header">
+        <div class="section-title">
+           Mods Workshop
+        </div>
+        <div class="section-subtitle">
+          Parcourez et installez des mods
+        </div>
+      </div>
+      <div id="modList">
+        <div class="empty-state">
+          <div class="empty-icon"></div>
+          <p>Sélectionnez un jeu pour voir ses mods</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

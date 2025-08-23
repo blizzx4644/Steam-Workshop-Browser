@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Configuration SteamCMD</title>
+    <style>
+        body {
+          background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 100%);
+          color: #f8fafc;
+          font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+          margin: 0;
+          padding: 20px;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
+
+        .container {
+          background: rgba(30, 30, 46, 0.8);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 16px;
+          padding: 40px;
+          max-width: 500px;
+          text-align: center;
+          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+          color: #a78bfa;
+          margin-bottom: 24px;
+          font-size: 28px;
+          font-weight: 700;
+        }
+
+        .status {
+          background: rgba(15, 15, 15, 0.6);
+          border: 1px solid rgba(139, 92, 246, 0.2);
+          border-radius: 12px;
+          padding: 20px;
+          margin: 20px 0;
+          text-align: left;
+        }
+
+        .status h3 {
+          color: #a78bfa;
+          margin-bottom: 12px;
+          font-size: 16px;
+        }
+
+        .status-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 8px 0;
+          font-size: 14px;
+        }
+
+        .status-ok {
+          color: #10b981;
+        }
+
+        .status-error {
+          color: #ef4444;
+        }
+
+        .status-warning {
+          color: #f59e0b;
+        }
+
+        button {
+          background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+          color: #fff;
+          border: none;
+          padding: 12px 24px;
+          margin: 8px;
+          cursor: pointer;
+          border-radius: 10px;
+          font-size: 14px;
+          font-weight: 600;
+          transition: all 0.3s ease;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        button:hover:not(:disabled) {
+          transform: translateY(-2px);
+          box-shadow: 0 8px 24px rgba(139, 92, 246, 0.3);
+        }
+
+        button:disabled {
+          background: #374151;
+          cursor: not-allowed;
+          transform: none;
+          opacity: 0.6;
+        }
+
+        .button-secondary {
+          background: transparent !important;
+          border: 1px solid rgba(139, 92, 246, 0.5) !important;
+          color: #a78bfa !important;
+        }
+
+        .button-secondary:hover:not(:disabled) {
+          background: rgba(139, 92, 246, 0.1) !important;
+          border-color: #a78bfa !important;
+        }
+
+        .progress {
+          width: 100%;
+          height: 6px;
+          background: rgba(15, 15, 15, 0.6);
+          border-radius: 3px;
+          overflow: hidden;
+          margin: 16px 0;
+        }
+
+        .progress-bar {
+          height: 100%;
+          background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+          border-radius: 3px;
+          transition: width 0.3s ease;
+          width: 0%;
+        }
+
+        .message {
+          margin: 16px 0;
+          padding: 12px;
+          border-radius: 8px;
+          font-size: 14px;
+        }
+
+        .message.error {
+          background: rgba(239, 68, 68, 0.1);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          color: #fca5a5;
+        }
+
+        .message.success {
+          background: rgba(16, 185, 129, 0.1);
+          border: 1px solid rgba(16, 185, 129, 0.3);
+          color: #6ee7b7;
+        }
+
+        .message.info {
+          background: rgba(59, 130, 246, 0.1);
+          border: 1px solid rgba(59, 130, 246, 0.3);
+          color: #93c5fd;
+        }
+
+        .guide {
+          background: rgba(15, 15, 15, 0.4);
+          border-left: 3px solid #a78bfa;
+          padding: 16px;
+          margin: 20px 0;
+          text-align: left;
+          font-size: 13px;
+          line-height: 1.5;
+          border-radius: 0 8px 8px 0;
+        }
+
+        .actions {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+          margin-top: 24px;
+        }
+
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+
+        .loading {
+          display: inline-block;
+          animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🛠️ Configuration SteamCMD</h1>
+
+    <div class="status" id="statusPanel">
+        <h3>État du système</h3>
+        <div class="status-item">
+            <span>SteamCMD détecté:</span>
+            <span id="steamcmdStatus" class="status-error">❌ Non trouvé</span>
+        </div>
+        <div class="status-item">
+            <span>Chemin configuré:</span>
+            <span id="configuredPath" class="status-warning">⚠️ Aucun</span>
+        </div>
+        <div class="status-item">
+            <span>Système:</span>
+            <span id="systemInfo" class="status-ok">✅ Windows</span>
+        </div>
+    </div>
+
+    <div id="message"></div>
+
+    <div class="progress" id="progressContainer" style="display: none;">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="actions">
+        <button id="autoDownloadBtn" onclick="autoDownloadSteamCMD()">
+            📥 Télécharger SteamCMD automatiquement
+        </button>
+
+        <button class="button-secondary" onclick="browseSteamCMD()">
+            📁 Localiser SteamCMD manuellement
+        </button>
+
+        <button class="button-secondary" id="testBtn" onclick="testSteamCMD()" disabled>
+            🧪 Tester SteamCMD
+        </button>
+
+        <button class="button-secondary" onclick="continueWithoutSteamCMD()">
+            ⏭️ Continuer sans SteamCMD
+        </button>
+    </div>
+
+    <div class="guide">
+        <strong>ℹ️ Informations :</strong><br>
+        SteamCMD est nécessaire pour télécharger les mods depuis Steam Workshop.
+        Vous pouvez soit le télécharger automatiquement, soit le localiser s'il est déjà installé.
+    </div>
+</div>
+
+<script>
+    let currentConfig = null;
+
+    async function init() {
+      try {
+        // Charger la configuration actuelle
+        currentConfig = await window.electronAPI.getConfig();
+        updateStatus();
+
+        // Détecter le système
+        const platform = await window.electronAPI.getPlatform();
+        document.getElementById('systemInfo').textContent = `✅ ${platform}`;
+
+      } catch (error) {
+        showMessage('Erreur lors du chargement de la configuration', 'error');
+        console.error(error);
+      }
+    }
+
+    function updateStatus() {
+      const steamcmdStatus = document.getElementById('steamcmdStatus');
+      const configuredPath = document.getElementById('configuredPath');
+      const testBtn = document.getElementById('testBtn');
+
+      if (currentConfig.steamcmdPath && currentConfig.steamcmdPath !== 'null') {
+        steamcmdStatus.textContent = '✅ Trouvé';
+        steamcmdStatus.className = 'status-ok';
+        configuredPath.textContent = `✅ ${currentConfig.steamcmdPath}`;
+        configuredPath.className = 'status-ok';
+        testBtn.disabled = false;
+      } else {
+        steamcmdStatus.textContent = '❌ Non trouvé';
+        steamcmdStatus.className = 'status-error';
+        configuredPath.textContent = '⚠️ Aucun';
+        configuredPath.className = 'status-warning';
+        testBtn.disabled = true;
+      }
+    }
+
+    function showMessage(text, type = 'info') {
+      const messageDiv = document.getElementById('message');
+      messageDiv.textContent = text;
+      messageDiv.className = `message ${type}`;
+      messageDiv.style.display = 'block';
+    }
+
+    function hideMessage() {
+      document.getElementById('message').style.display = 'none';
+    }
+
+    function showProgress(show = true, percent = 0) {
+      const container = document.getElementById('progressContainer');
+      const bar = document.getElementById('progressBar');
+
+      if (show) {
+        container.style.display = 'block';
+        bar.style.width = `${percent}%`;
+      } else {
+        container.style.display = 'none';
+      }
+    }
+
+    async function autoDownloadSteamCMD() {
+      const button = document.getElementById('autoDownloadBtn');
+      const originalText = button.textContent;
+
+      try {
+        button.disabled = true;
+        button.innerHTML = '<span class="loading">⚙️</span> Téléchargement...';
+
+        hideMessage();
+        showProgress(true, 10);
+
+        showMessage('Téléchargement de SteamCMD en cours...', 'info');
+        showProgress(true, 30);
+
+        const result = await window.electronAPI.downloadSteamCMD();
+
+        showProgress(true, 80);
+
+        if (result.ok) {
+          showProgress(true, 100);
+          showMessage(`SteamCMD téléchargé avec succès !`, 'success');
+
+          // Mettre à jour la configuration
+          currentConfig.steamcmdPath = result.path;
+          updateStatus();
+
+          button.innerHTML = '✅ Téléchargé !';
+          button.style.background = '#10b981';
+
+          setTimeout(() => {
+            showProgress(false);
+          }, 1000);
+
+        } else {
+          throw new Error(result.error);
+        }
+
+      } catch (error) {
+        console.error('Erreur téléchargement:', error);
+        showMessage(`Erreur: ${error.message}`, 'error');
+        showProgress(false);
+
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
+
+    async function browseSteamCMD() {
+      try {
+        const result = await window.electronAPI.browseSteamCMD();
+
+        if (result) {
+          currentConfig.steamcmdPath = result;
+          updateStatus();
+          showMessage('Chemin SteamCMD configuré !', 'success');
+        }
+
+      } catch (error) {
+        showMessage(`Erreur: ${error.message}`, 'error');
+      }
+    }
+
+    async function testSteamCMD() {
+      const button = document.getElementById('testBtn');
+      const originalText = button.textContent;
+
+      try {
+        button.disabled = true;
+        button.innerHTML = '<span class="loading">🧪</span> Test...';
+        hideMessage();
+
+        const result = await window.electronAPI.testSteamCMD();
+
+        if (result.ok) {
+          showMessage('✅ SteamCMD fonctionne correctement !', 'success');
+          button.innerHTML = '✅ Test réussi';
+          button.style.background = '#10b981';
+        } else {
+          showMessage(`❌ Erreur: ${result.error}`, 'error');
+          button.disabled = false;
+          button.textContent = originalText;
+        }
+
+      } catch (error) {
+        showMessage(`Erreur lors du test: ${error.message}`, 'error');
+        button.disabled = false;
+        button.textContent = originalText;
+      }
+    }
+
+    async function continueWithoutSteamCMD() {
+      try {
+        await window.electronAPI.continueWithoutSteamCMD();
+      } catch (error) {
+        console.error('Erreur:', error);
+      }
+    }
+
+    // Initialiser au chargement
+    document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

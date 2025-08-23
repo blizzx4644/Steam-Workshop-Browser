@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuration Steam API</title>
+  <style>
+    body {
+      background: #121212;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background: #1e1e1e;
+      border: 1px solid #333;
+      border-radius: 8px;
+      padding: 30px;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #5b00ff;
+      margin-bottom: 20px;
+      font-size: 24px;
+    }
+
+    input {
+      background: #222;
+      color: #fff;
+      border: 1px solid #555;
+      padding: 10px;
+      margin: 10px 0;
+      width: 100%;
+      box-sizing: border-box;
+      border-radius: 4px;
+    }
+
+    button {
+      background: #5b00ff;
+      color: #fff;
+      border: none;
+      padding: 10px 20px;
+      margin: 10px 0;
+      cursor: pointer;
+      border-radius: 4px;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #7a2eff;
+    }
+
+    button:disabled {
+      background: #444;
+      cursor: not-allowed;
+    }
+
+    .guide {
+      background: #2a2a2a;
+      border-left: 3px solid #5b00ff;
+      padding: 15px;
+      margin: 20px 0;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    .guide a {
+      color: #5b00ff;
+      text-decoration: none;
+    }
+
+    .guide a:hover {
+      text-decoration: underline;
+    }
+
+    .error {
+      color: #ff4444;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+
+    .success {
+      color: #44ff44;
+      margin: 10px 0;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <h1>Configuration Steam API</h1>
+
+  <div class="guide">
+    <strong>Comment obtenir votre clé Steam API :</strong><br>
+    1. Connectez-vous sur <a href="#" onclick="openSteamApiPage()">steamcommunity.com/dev/apikey</a><br>
+    2. Entrez un nom de domaine (ex: localhost)<br>
+    3. Copiez la clé générée ci-dessous<br>
+    (Il faut avoir depensé 5 Euro minimum avec le compte utilisé)
+  </div>
+
+  <input
+          id="apiKeyInput"
+          type="text"
+          placeholder="Entrez votre clé Steam API..."
+          maxlength="32"
+  />
+
+  <div id="message"></div>
+
+  <button id="saveButton" onclick="saveApiKey()">Sauvegarder et continuer</button>
+</div>
+
+<script>
+  async function openSteamApiPage() {
+    try {
+      await window.electronAPI.openExternal('https://steamcommunity.com/dev/apikey');
+    } catch (error) {
+      console.error('Erreur ouverture lien:', error);
+      // Fallback : copier le lien dans le clipboard si possible
+      showMessage('Allez sur : https://steamcommunity.com/dev/apikey', 'error');
+    }
+  }
+
+  function showMessage(text, type = 'info') {
+    const messageDiv = document.getElementById('message');
+    messageDiv.textContent = text;
+    messageDiv.className = type;
+  }
+
+  async function saveApiKey() {
+    const key = document.getElementById("apiKeyInput").value.trim();
+    const button = document.getElementById("saveButton");
+
+    // Reset message
+    showMessage('');
+
+    if (!key) {
+      showMessage("Veuillez entrer une clé API valide", 'error');
+      return;
+    }
+
+    if (key.length !== 32) {
+      showMessage("La clé API Steam doit faire 32 caractères", 'error');
+      return;
+    }
+
+    // Validation basique du format (lettres et chiffres uniquement)
+    if (!/^[A-F0-9]{32}$/i.test(key)) {
+      showMessage("Format de clé invalide. La clé doit contenir uniquement des lettres et chiffres", 'error');
+      return;
+    }
+
+    try {
+      button.disabled = true;
+      button.textContent = "Sauvegarde...";
+
+      await window.electronAPI.saveApiKey(key);
+
+      showMessage("Clé API sauvegardée avec succès !", 'success');
+
+      // La fenêtre se fermera automatiquement depuis main.js
+      setTimeout(() => {
+        button.textContent = "Terminé ✓";
+      }, 500);
+
+    } catch (error) {
+      console.error('Erreur sauvegarde:', error);
+      showMessage("Erreur lors de la sauvegarde : " + error.message, 'error');
+      button.disabled = false;
+      button.textContent = "Sauvegarder et continuer";
+    }
+  }
+
+  // Permettre d'appuyer sur Entrée pour valider
+  document.getElementById("apiKeyInput").addEventListener("keypress", (e) => {
+    if (e.key === "Enter") {
+      saveApiKey();
+    }
+  });
+
+  // Auto-focus sur le champ de saisie
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById("apiKeyInput").focus();
+  });
+
+  // Vérifier que les APIs Electron sont disponibles
+  if (!window.electronAPI) {
+    showMessage("Erreur : APIs Electron non disponibles. Veuillez redémarrer l'application.", 'error');
+    document.getElementById("saveButton").disabled = true;
+  }
+</script>
+</body>
+</html>
