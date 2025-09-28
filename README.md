@@ -2,6 +2,9 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+<img width="1904" height="1001" alt="Steam Workshop Browser1" src="https://github.com/user-attachments/assets/03abe862-a186-4266-a93f-4db544bd78b0" />
+
+
 **Steam Workshop Browser** est une application Windows innovante qui révolutionne la façon dont vous gérez les mods Steam. Conçue pour les joueurs et les moddeurs, cette application vous permet de parcourir, télécharger et gérer les mods du Workshop Steam **sans avoir besoin d'installer les jeux correspondants**.
 
 ### 🎮 Pourquoi choisir Steam Workshop Browser ?
