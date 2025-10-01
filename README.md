@@ -20,7 +20,7 @@ Parfait pour les collectionneurs de mods, les testeurs, ou ceux qui veulent simp
 
 ## 📥 Téléchargement
 
-Une version pré-compilée pour Windows est disponible dans la section [Releases](https://github.com/votre-utilisateur/steam-workshop-browser/releases](https://github.com/blizzx4644/Steam-Workshop-Browser/releases)) :
+Une version pré-compilée pour Windows est disponible dans la section [Releases](https://github.com/blizzx4644/Steam-Workshop-Browser/releases) :
 
 - Windows : `Steam Workshop Browser Setup 1.0.0.exe`
 
